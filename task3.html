@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz & Joke App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      background: #00695c;
+      color: white;
+      padding: 15px;
+      margin: 0;
+    }
+
+    /* Quiz Section */
+    .quiz-container {
+      max-width: 400px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .quiz-container button {
+      display: block;
+      width: 100%;
+      margin: 5px 0;
+      padding: 10px;
+      background: #00695c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .quiz-container button:hover {
+      background: #004d40;
+    }
+
+    /* Joke Section */
+    .joke-container {
+      max-width: 500px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .joke-container button {
+      background: #00695c;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .joke-container button:hover {
+      background: #004d40;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .quiz-container, .joke-container { width: 90%; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Quiz & Joke App</h1>
+
+  <!-- Quiz Section -->
+  <div class="quiz-container">
+    <h2>🧠 Web Development Quiz</h2>
+    <p id="quiz-question"></p>
+    <div id="quiz-options"></div>
+    <p id="quiz-feedback"></p>
+    <button id="next-btn" style="display:none;">Next Question</button>
+    <p id="quiz-score"></p>
+  </div>
+
+  <!-- Joke Section -->
+  <div class="joke-container">
+    <h2>😂 Random Joke</h2>
+    <button onclick="fetchJoke()">Get a Joke</button>
+    <p id="joke"></p>
+  </div>
+
+  <script>
+    /* --- Quiz Data --- */
+    const quizData = [
+      {
+        question: "What does CSS stand for?",
+        options: ["Creative Style Sheets", "Cascading Style Sheets", "Computer Style Sheets", "Colorful Style Scripts"],
+        answer: 1
+      },
+      {
+        question: "Which HTML tag is used to link JavaScript?",
+        options: ["<link>", "<script>", "<javascript>", "<code>"],
+        answer: 1
+      },
+      {
+        question: "Which company developed JavaScript?",
+        options: ["Microsoft", "Sun Microsystems", "Netscape", "Google"],
+        answer: 2
+      },
+      {
+        question: "Which of these is a CSS framework?",
+        options: ["React", "Vue", "Bootstrap", "Node.js"],
+        answer: 2
+      },
+      {
+        question: "What keyword is used to declare a variable in JavaScript?",
+        options: ["var", "int", "string", "const var"],
+        answer: 0
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById('quiz-question');
+    const optionsEl = document.getElementById('quiz-options');
+    const feedbackEl = document.getElementById('quiz-feedback');
+    const nextBtn = document.getElementById('next-btn');
+    const scoreEl = document.getElementById('quiz-score');
+
+    /* --- Load Question --- */
+    function loadQuestion() {
+      const q = quizData[currentQuestion];
+      questionEl.textContent = `${currentQuestion + 1}. ${q.question}`;
+      optionsEl.innerHTML = "";
+      feedbackEl.textContent = "";
+      nextBtn.style.display = "none";
+
+      q.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(index);
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    /* --- Check Answer --- */
+    function checkAnswer(selected) {
+      const q = quizData[currentQuestion];
+      if (selected === q.answer) {
+        feedbackEl.textContent = "✅ Correct!";
+        feedbackEl.style.color = "green";
+        score++;
+      } else {
+        feedbackEl.textContent = `❌ Wrong! Correct answer: ${q.options[q.answer]}`;
+        feedbackEl.style.color = "red";
+      }
+      nextBtn.style.display = "inline-block";
+      Array.from(optionsEl.children).forEach(btn => btn.disabled = true);
+    }
+
+    /* --- Next Question --- */
+    nextBtn.onclick = () => {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        showScore();
+      }
+    };
+
+    /* --- Show Score --- */
+    function showScore() {
+      questionEl.textContent = "Quiz Completed!";
+      optionsEl.innerHTML = "";
+      feedbackEl.textContent = "";
+      nextBtn.style.display = "none";
+      scoreEl.textContent = `Your Score: ${score} / ${quizData.length}`;
+    }
+
+    /* --- Start Quiz --- */
+    loadQuestion();
+
+    /* --- Joke Fetch Functionality --- */
+    async function fetchJoke() {
+      const jokeBox = document.getElementById('joke');
+      jokeBox.textContent = "⏳ Loading joke...";
+      try {
+        const res = await fetch("https://v2.jokeapi.dev/joke/Any?safe-mode");
+        const data = await res.json();
+        jokeBox.textContent = data.type === "single" ? data.joke : `${data.setup} — ${data.delivery}`;
+      } catch (err) {
+        jokeBox.textContent = "⚠️ Could not load joke. Try again!";
+      }
+    }
+  </script>
+
+</body>
+</html>
